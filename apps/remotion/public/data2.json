@@ -1,0 +1,128 @@
+{
+  "title": "GenkitとGeminiで能力を最大限に引き出す方法：サンプルコード徹底解説",
+  "scenes": [
+    {
+      "type": "TITLE",
+      "title": "GenkitとGeminiで能力を最大限に引き出す方法",
+      "content": "samples/js-geminiのコード徹底解説",
+      "script": "この動画では、GenkitとGeminiの組み合わせで、その能力を最大限に引き出すための公式サンプルコードを徹底的に解説します。GenkitがGeminiの多様な機能をいかにシンプルに、そして強力に活用できるかを見ていきましょう。"
+    },
+    {
+      "type": "EXPLANATION",
+      "title": "はじめに：GenkitとGeminiの最高の組み合わせ",
+      "content": "GenkitはGoogle AI (Gemini) との連携を強力にサポートしており、多様なプロンプト形式、ツール利用、ストリーミング、さらには画像・動画・音声生成といった高度な機能まで、一貫したインターフェースで利用できます。このサンプルコードは、その可能性を最大限に引き出すための最高のガイドとなるでしょう。",
+      "script": "Genkitは、Google AIであるGeminiとの連携において、その真価を発揮します。テキストだけでなく、画像、動画、音声といったマルチモーダルな入力から、ツール利用、高度な推論まで、Genkitが提供する統一されたインターフェースを通じて、Geminiの能力をいかに引き出すかを、実際のコードを見ながら解説していきます。"
+    },
+    {
+      "type": "CODE",
+      "title": "1. Genkitの初期設定とGeminiモデルの利用",
+      "content": "import { googleAI } from '@genkit-ai/google-genai';\nimport { genkit } from 'genkit';\n\nconst ai = genkit({\n  plugins: [\n    // Provide the key via the GOOGLE_GENAI_API_KEY environment variable or arg { apiKey: 'yourkey'}\n    googleAI({ experimental_debugTraces: true }),\n  ],\n});",
+      "script": "まず、Genkitアプリケーションの初期設定と、GeminiモデルをGenkitに組み込む方法を見ていきましょう。`@genkit-ai/google-genai`プラグインを導入し、`plugins`配列に含めることで、GenkitはGeminiモデルを利用できるようになります。APIキーは環境変数で管理するのが一般的です。`experimental_debugTraces: true`でデバッグトレースを有効にすると、開発時に非常に役立ちます。",
+      "highlightLines": [1, 2, 6, 8]
+    },
+    {
+      "type": "CODE",
+      "title": "Geminiモデルの呼び出し",
+      "content": "ai.defineFlow('basic-hi', async () => {\n  const { text } = await ai.generate({\n    model: googleAI.model('gemini-2.5-flash'), // ここでGeminiモデルを指定\n    prompt: 'You are a helpful AI assistant named Walt, say hello',\n  });\n\n  return text;\n});",
+      "script": "Genkitでモデルを呼び出す際の主要なメソッドは`ai.generate`です。ここで重要なのは、`model: googleAI.model('gemini-2.5-flash')`のように、利用したいGeminiモデルのIDを指定する点です。用途に応じて、高速な`flash`モデルや高性能な`pro`モデルを選択できます。",
+      "highlightLines": [3, 4]
+    },
+    {
+      "type": "CODE",
+      "title": "2. 多様なプロンプト形式のサポート：マルチモーダル入力",
+      "content": "// Multimodal input\nai.defineFlow('multimodal-input', async () => {\n  const photoBase64 = fs.readFileSync('photo.jpg', { encoding: 'base64' });\n\n  const { text } = await ai.generate({\n    model: googleAI.model('gemini-2.5-flash'),\n    prompt: [\n      { text: 'describe this photo' }, // テキストプロンプト\n      {\n        media: {\n          contentType: 'image/jpeg',\n          url: `data:image/jpeg;base64,${photoBase64}` // 画像データ (Base64)\n        }\n      }\n    ]\n  });\n\n  return text;\n});",
+      "script": "Geminiの大きな強みは、テキストだけでなく画像などのマルチモーダルな入力を扱える点です。Genkitでは、`prompt`をオブジェクトの配列として渡し、テキストとメディアを組み合わせることができます。`media`オブジェクトで`contentType`とBase64エンコードされた画像データを指定することで、ローカルファイルを簡単にモデルに渡せます。",
+      "highlightLines": [7, 8, 9, 10, 11, 12]
+    },
+    {
+      "type": "CODE",
+      "title": "YouTube動画の文字起こし",
+      "content": "// YouTube videos\nai.defineFlow('youtube-videos', async (_, { sendChunk }) => {\n  const { text } = await ai.generate({\n    model: googleAI.model('gemini-2.5-flash'),\n    prompt: [\n      {\n        text: 'transcribe this video',\n      },\n      {\n        media: {\n          url: 'https://www.youtube.com/watch?v=3p1P5grjXIQ', // YouTube動画のURL\n          contentType: 'video/mp4', // video/mp4 を指定していますが、GeminiがYouTube URLを直接処理できることを示唆しています。\n        },\n      },\n    ],\n  });\n\n  return text;\n});",
+      "script": "GeminiはYouTubeのURLを直接受け取り、その内容を理解して処理する能力を持っています。これにより、動画ファイルをダウンロードする手間なく、動画コンテンツをプロンプトとして利用できます。`media`オブジェクトの`url`にYouTubeのURLを直接指定するだけです。",
+      "highlightLines": [11]
+    },
+    {
+      "type": "CODE",
+      "title": "3. ストリーミング出力",
+      "content": "// streaming\nai.defineFlow('streaming', async (_, { sendChunk }) => {\n  const { stream } = ai.generateStream({\n    model: googleAI.model('gemini-2.5-flash'),\n    prompt: 'Write a poem about AI.',\n  });\n\n  let poem = '';\n  for await (const chunk of stream) {\n    poem += chunk.text;\n    sendChunk(chunk.text); // クライアントにチャンクを送信\n  n}\n\n  return poem;\n});",
+      "script": "モデルの応答が長い場合、ユーザーエクスペリエンス向上のためにストリーミング機能が重要です。`ai.generateStream`を使うと、モデルがテキストを生成するたびにチャンクを受け取れます。`sendChunk`を呼び出すことで、生成中のテキストをリアルタイムでクライアントに送信し、ユーザーは応答が逐次的に生成される様子を見ることができます。",
+      "highlightLines": [3, 9, 11]
+    },
+    {
+      "type": "CODE",
+      "title": "4. ツール利用 (Tool Calling) とグラウンディング",
+      "content": "const getWeather = ai.defineTool(\n  {\n    name: 'getWeather',\n    inputSchema: z.object({\n      location: z\n        .string()\n        .describe(\n          'Location for which to get the weather, ex: San-Francisco, CA'\n        ),\n    }),\n    description: 'used to get current weather for a location',\n  },\n  async (input) => {\n    // pretend we call an actual API\n    return {\n      location: input.location,\n      temperature_celcius: 21.5,\n      conditions: 'cloudy',\n    };\n  }\n);",
+      "script": "Geminiは外部ツールを呼び出して情報を取得したり、特定のアクションを実行したりする「ツール利用」の能力を持っています。Genkitでは`ai.defineTool`を使ってカスタムツールを定義します。`inputSchema`で`zod`を使って引数の形式を定義し、`description`でモデルがツールを使うべきかを判断するための情報を提供します。",
+      "highlightLines": [1, 3, 4, 10]
+    },
+    {
+      "type": "CODE",
+      "title": "カスタムツールの利用",
+      "content": "ai.defineFlow(\n  {\n    name: 'toolCalling',\n    inputSchema: z.string().default('Paris, France'),\n    outputSchema: z.string(),\n    streamSchema: z.any(),\n  },\n  async (location, { sendChunk }) => {\n    const { response, stream } = ai.generateStream({\n      model: googleAI.model('gemini-2.5-flash'),\n      config: {\n        temperature: 1,\n      },\n      tools: [getWeather, celsiusToFahrenheit], // 定義したツールをここに渡す\n      prompt: `What's the weather in ${location}? Convert the temperature to Fahrenheit.`,\n    });\n\n    for await (const chunk of stream) {\n      sendChunk(chunk);\n    }\n\n    return (await response).text;\n  }\n);",
+      "script": "定義したツールは、`ai.generateStream`や`ai.generate`の`tools`オプションに配列で渡します。これにより、Geminiモデルはプロンプトに対し、これらのツールを利用するかどうかを自動的に判断し、必要に応じて呼び出します。例えば、天気と温度変換のツールを組み合わせた複雑なタスクも実行可能です。",
+      "highlightLines": [14]
+    },
+    {
+      "type": "CODE",
+      "title": "Google Searchを利用したグラウンディング",
+      "content": "// Search grounding\nai.defineFlow('search-grounding', async () => {\n  const { text, raw } = await ai.generate({\n    model: googleAI.model('gemini-2.5-flash'),\n    prompt: 'Who is Albert Einstein?',\n    config: {\n      tools: [{ googleSearch: {} }], // Google Search ツールを指定\n    },\n  });\n\n  return {\n    text,\n    groundingMetadata: (raw as any)?.candidates[0]?.groundingMetadata,\n  };\n});",
+      "script": "Geminiは、自身の知識だけでなく、リアルタイムの情報源であるGoogle Searchを利用して回答を補強する「グラウンディング」機能も持っています。`config.tools`オプションに`googleSearch: {}`を指定するだけで、モデルは必要に応じてGoogle Searchを実行し、最新の情報を回答に利用できます。",
+      "highlightLines": [7]
+    },
+    {
+      "type": "CODE",
+      "title": "5. 構造化出力",
+      "content": "const RpgCharacterSchema = z.object({\n  name: z.string().describe('name of the character'),\n  backstory: z.string().describe(\"character's backstory, about a paragraph\"),\n  weapons: z.array(z.string()),\n  class: z.enum(['RANGER', 'WIZZARD', 'TANK', 'HEALER', 'ENGINEER']),\n});\n\n// A simple example of structured output.\nai.defineFlow(\n  {\n    name: 'structured-output',\n    inputSchema: z.string().default('Glorb'),\n    outputSchema: RpgCharacterSchema, // 出力スキーマを指定\n  },\n  async (name, { sendChunk }) => {\n    const { response, stream } = ai.generateStream({\n      model: googleAI.model('gemini-2.5-flash'),\n      config: {\n        temperature: 2, // we want creativity\n      },\n      output: { schema: RpgCharacterSchema }, // ここでも出力スキーマを指定\n      prompt: `Generate an RPC character called ${name}`,\n    });\n\n    for await (const chunk of stream) {\n      sendChunk(chunk.output); // チャンクも構造化された形式で受け取れる\n    }\n\n    return (await response).output!;\n  }\n);",
+      "script": "モデルの応答を特定のデータ構造、例えばJSONで受け取りたい場合、Genkitは`zod`と組み合わせて構造化出力をサポートします。`zod`で期待する出力のスキーマを厳密に定義し、`ai.defineFlow`の`outputSchema`と`ai.generateStream`の`output: { schema: RpgCharacterSchema }`で指定することで、型安全な出力を得られます。",
+      "highlightLines": [1, 2, 3, 4, 5, 13, 22]
+    },
+    {
+      "type": "CODE",
+      "title": "6. 高度なGemini機能：推論 (Reasoning)",
+      "content": "// Gemini reasoning example.\nai.defineFlow('reasoning', async (_, { sendChunk }) => {\n  const { message } = await ai.generate({\n    prompt: 'what is heavier, one kilo of steel or one kilo of feathers',\n    model: googleAI.model('gemini-2.5-pro'), // pro モデルを使用\n    config: {\n      thinkingConfig: {\n        thinkingBudget: 1024,\n        includeThoughts: true, // 思考プロセスを含める\n      },\n    },\n    onChunk: sendChunk,\n  });\n\n  return message;\n});",
+      "script": "Geminiは複雑な問題に対して段階的な推論を行う能力を持っています。`googleAI.model('gemini-2.5-pro')`のような高性能モデルを使用し、`config`内の`thinkingConfig`で`includeThoughts: true`を設定することで、モデルが最終的な回答に至るまでの思考プロセスも出力に含まれるようになり、判断根拠を理解しやすくなります。",
+      "highlightLines": [5, 7, 9]
+    },
+    {
+      "type": "CODE",
+      "title": "コード実行 (Code Execution)",
+      "content": "// Gemini code execution.\nai.defineFlow('code-execution', async (_, { sendChunk }) => {\n  const { message } = await ai.generate({\n    prompt: 'Calculate x^6-2x^5+x+11 for x=22',\n    model: googleAI.model('gemini-2.5-flash'),\n    config: {\n      codeExecution: true, // コード実行を有効にする\n    },\n    onChunk: sendChunk,\n  });\n\n  return message;\n});",
+      "script": "Geminiは内部的にコードを実行して計算を行ったり、複雑な問題を解決したりする能力を持っています。`config`オプションで`codeExecution: true`を設定することで、モデルは必要に応じて内部的にコードを生成・実行し、その結果を回答に利用します。これにより、複雑な計算問題なども正確に解くことができます。",
+      "highlightLines": [7]
+    },
+    {
+      "type": "CODE",
+      "title": "画像編集",
+      "content": "// Image editing with Gemini.\nai.defineFlow('gemini-image-editing', async (_) => {\n  const plant = fs.readFileSync('palm_tree.png', { encoding: 'base64' });\n  const room = fs.readFileSync('my_room.png', { encoding: 'base64' });\n\n  const { media } = await ai.generate({\n    model: googleAI.model('gemini-2.5-flash-image-preview'), // 画像プレビューモデル\n    prompt: [\n      { text: 'add the plant to my room' },\n      { media: { url: `data:image/png;base64,${plant}` } },\n      { media: { url: `data:image/png;base64,${room}` } }\n    ],\n    config: {\n      responseModalities: ['TEXT', 'IMAGE'], // テキストと画像の応答を要求\n    },\n  });\n\n  return media;\n});",
+      "script": "Geminiのマルチモーダル能力は、画像の生成や編集にも及びます。画像編集に特化した`gemini-2.5-flash-image-preview`モデルを使用し、複数の画像をプロンプトとして入力できます。`responseModalities: ['TEXT', 'IMAGE']`を設定することで、モデルは編集された画像を生成して返します。",
+      "highlightLines": [7, 8, 9, 10, 11, 14]
+    },
+    {
+      "type": "CODE",
+      "title": "画像生成",
+      "content": "// A simple example of image generation with Gemini.\nai.defineFlow('imagen-image-generation', async (_) => {\n  const { media } = await ai.generate({\n    model: googleAI.model('imagen-3.0-generate-002'), // Imagen モデルを使用\n    prompt: `generate an image of a banana riding a bicycle`,\n  });\n\n  return media;\n});",
+      "script": "Geminiは、テキストプロンプトに基づいて新しい画像を生成することもできます。Googleの画像生成モデルである`imagen-3.0-generate-002`を利用することで、シンプルなテキストプロンプトから、想像力豊かな画像を生成することが可能です。",
+      "highlightLines": [4, 5]
+    },
+    {
+      "type": "CODE",
+      "title": "テキスト読み上げ (TTS) 機能",
+      "content": "// TTS sample\nai.defineFlow(\n  {\n    name: 'tts',\n    inputSchema: z\n      .string()\n      .default(\n        'Gemini is amazing. Can say things like: glorg, blub-blub, and ayeeeeee!!!'\n      ),\n    outputSchema: z.object({ media: z.string() }),\n  },\n  async (prompt) => {\n    const { media } = await ai.generate({\n      model: googleAI.model('gemini-2.5-flash-preview-tts'), // TTSプレビューモデル\n      config: {\n        responseModalities: ['AUDIO'], // 音声応答を要求\n        speechConfig: {\n          voiceConfig: {\n            prebuiltVoiceConfig: { voiceName: 'Algenib' }, // 音声の種類を指定\n          },\n        },\n      },\n      prompt,\n    });\n    if (!media) {\n      throw new Error('no media returned');\n    }\n    const audioBuffer = Buffer.from(\n      media.url.substring(media.url.indexOf(',') + 1),\n      'base64'\n    );\n    return {\n      media: 'data:audio/wav;base64,' + (await toWav(audioBuffer)),\n    };\n  }\n);",
+      "script": "Geminiは、テキストを自然な音声に変換するテキスト読み上げ、TTS機能も提供します。`gemini-2.5-flash-preview-tts`モデルを使用し、`responseModalities: ['AUDIO']`と`speechConfig`で音声の種類を指定することで、モデルから音声データを受け取ることができます。",
+      "highlightLines": [14, 16, 17, 18, 19, 20]
+    },
+    {
+      "type": "CODE",
+      "title": "動画生成 (Veo) 機能",
+      "content": "// An example of using Ver 2 model to make a static photo move.\nai.defineFlow('photo-move-veo', async (_, { sendChunk }) => {\n  const startingImage = fs.readFileSync('photo.jpg', { encoding: 'base64' });\n\n  let { operation } = await ai.generate({\n    model: googleAI.model('veo-2.0-generate-001'), // Veo モデルを使用\n    prompt: [\n      {\n        text: 'make the subject in the photo move',\n      },\n      {\n        media: {\n          contentType: 'image/jpeg',\n          url: `data:image/jpeg;base64,${startingImage}`,\n        },\n      },\n    ],\n    config: {\n      durationSeconds: 5,\n      aspectRatio: '9:16',\n      personGeneration: 'allow_adult',\n    },\n  });\n\n  if (!operation) {\n    throw new Error('Expected the model to return an operation');\n  }\n\n  while (!operation.done) {\n    sendChunk('check status of operation ' + operation.id);\n    operation = await ai.checkOperation(operation); // 非同期操作のステータスを確認\n    await new Promise((resolve) => setTimeout(resolve, 5000));\n  }\n\n  // ... (動画ダウンロード処理)\n});",
+      "script": "Geminiは、テキストや画像から動画を生成するVeoモデルも利用できます。`veo-2.0-generate-001`モデルを使い、静止画とテキストプロンプトから動画を生成します。動画生成は時間のかかる非同期操作なので、`operation`オブジェクトをポーリングしてステータスを確認する処理が必要です。",
+      "highlightLines": [6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 19, 20, 31, 32]
+    },
+    {
+      "type": "EXPLANATION",
+      "title": "まとめ：GenkitとGeminiの可能性",
+      "content": "このサンプルコードは、GenkitがGeminiの広範な機能をいかにシンプルかつ強力に活用できるかを示しています。\n- 統一されたインターフェースで多様な機能を活用\n- フローやツールによるモジュール化と拡張性\n- デバッグトレースや型安全なスキーマ定義による開発者体験の向上\nこれらのポイントを意識して、ご自身のプロジェクトでGenkitとGeminiを最大限に活用してください。",
+      "script": "Genkitは、`ai.generate`や`ai.defineFlow`といった統一されたインターフェースを通じて、Geminiのテキスト生成、マルチモーダル入力、ツール利用、構造化出力、高度な推論・コード実行、さらには画像・動画・音声生成といった多岐にわたる機能を一貫した方法で利用できます。この基盤を理解し、ご自身のプロジェクトでGenkitとGeminiの無限の可能性をぜひ探求してみてください。"
+    }
+  ]
+}

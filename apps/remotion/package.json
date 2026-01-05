@@ -1,0 +1,25 @@
+{
+  "name": "@studio/remotion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "remotion studio src/Root.tsx",
+    "build": "remotion render src/Root.tsx MainVideo out/video.mp4 --chrome-options=\"--no-sandbox\" --concurrency=1",
+    "build:verbose": "remotion render src/Root.tsx MainVideo out/video.mp4 --chrome-options=\"--no-sandbox\" --concurrency=1 --log=verbose"
+  },
+  "dependencies": {
+    "@remotion/google-fonts": "catalog:",
+    "@remotion/tailwind": "catalog:",
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "remotion": "catalog:",
+    "tailwindcss": "^4.1.18",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@remotion/cli": "catalog:"
+  }
+}

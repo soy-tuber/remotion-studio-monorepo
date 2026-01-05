@@ -1,0 +1,25 @@
+{
+  "title": "AI Video Rendering Engine Demo",
+  "scenes": [
+    {
+      "type": "INTRO",
+      "title": "Introduction",
+      "content": "Welcome to the AI Video Rendering Engine.",
+      "script": "こんにちは。これはAIビデオレンダリングエンジンのデモです。Geminiによって生成されたJSONデータをもとに動画を作成します。"
+    },
+    {
+      "type": "CODE",
+      "title": "Code Example",
+      "content": "Here is a simple React component.",
+      "script": "ここでは、シンプルなReactコンポーネントの例を見てみましょう。コードハイライト機能も実装されています。",
+      "code": "const App = () => {\n  return <div>Hello World</div>;\n};",
+      "highlightLines": [2]
+    },
+    {
+      "type": "OUTRO",
+      "title": "Conclusion",
+      "content": "Thank you for watching.",
+      "script": "ご視聴ありがとうございました。このように、JSONデータから簡単に動画を生成することができます。"
+    }
+  ]
+}
